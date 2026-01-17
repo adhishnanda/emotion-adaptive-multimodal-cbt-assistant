@@ -1,0 +1,103 @@
+project:
+  name: "emotion_adaptive_cbt_assistant"
+  seed: 42
+  debug_mode: false  # Set to true for fast testing with small datasets
+  fast_dev_run: false  # Set to true to run only 1-2 epochs on small subset
+
+paths:
+  data_root: "data"
+  raw_dir: "data/raw"
+  processed_dir: "data/processed"
+  models_dir: "models"
+  cache_dir: "cache"
+  logs_dir: "logs"
+
+text_model:
+  pretrained_name: "distilbert-base-uncased"
+  max_seq_len: 128
+  batch_size: 16
+  num_epochs: 3
+  learning_rate: 2e-5
+  train_subset_fraction: 1.0      # 100% of full dataset
+  class_balance_strategy: "weighted_random_sampler"  # or "oversample"
+
+device: "cuda"
+
+daic_woz:
+  sessions_dir: "data/raw/daic_woz/sessions"
+  splits_dir: "data/raw/daic_woz/splits"
+  processed_audio_dir: "data/processed/audio/daic_woz"
+  sample_rate: 16000
+  n_mels: 64
+  max_duration_secs: 30.0
+  subset_ratio: 0.8
+  batch_size: 16
+  num_workers: 4
+  class_balance: true
+
+iemocap_multimodal:
+  root_dir: "data/raw/iemocap/IEMOCAP_full_release"
+  index_path: "data/processed/iemocap_multimodal_index.csv"
+  audio_sample_rate: 16000
+  audio_max_duration: 10.0
+  video_frame_idx: 0
+  batch_size: 8
+  num_workers: 2
+
+iemocap_audio:
+  num_classes: 9  # IEMOCAP emotion classes: anger, happy, sadness, neutral, excited, frustration, disgust, fear, surprise
+  audio_sample_rate: 16000
+  n_mfcc: 40
+  batch_size: 8
+  learning_rate: 2e-4
+  num_epochs: 20
+  index_path: "data/processed/iemocap_multimodal_index.csv"
+
+iemocap_video:
+  index_csv: "data/processed/iemocap_multimodal_index.csv"
+  num_classes: 9  # IEMOCAP emotion classes
+  backbone: "resnet18"  # "resnet18" or "resnet50"
+  freeze_backbone: false  # If true, only train classifier head
+  image_size: 224  # Image size for ResNet (224 is standard)
+  batch_size: 8
+  learning_rate: 1e-4
+  num_epochs: 20
+
+iemocap_fusion:
+  index_csv: "data/processed/iemocap_multimodal_index.csv"
+  num_classes: 9  # IEMOCAP emotion classes
+  text_model_path: "models/text/distilbert_iemocap_best.pt"
+  audio_model_path: "models/audio/audio_iemocap_best.pt"
+  video_model_path: "models/video/video_iemocap_resnet_best.pt"
+  freeze_text: true  # Freeze text encoder
+  freeze_audio: true  # Freeze audio encoder
+  freeze_video: true  # Freeze video encoder
+  fusion_hidden_dim: 256  # Hidden dimension for fusion MLP
+  dropout: 0.3
+  batch_size: 4  # Smaller batch for multimodal
+  learning_rate: 1e-4
+  num_epochs: 15
+  fusion_model_path: "models/fusion/iemocap_multimodal_fusion_best.pt"  # Trained fusion model weights
+
+evaluation:
+  test_index_path: "data/processed/iemocap_multimodal_index.csv"
+  fusion_model_path: "models/fusion/iemocap_multimodal_fusion_best.pt"
+  output_dir: "reports/metrics"
+  figures_dir: "reports/figures"
+  batch_size: 8
+  num_workers: 2
+  class_names:
+    - "anger"
+    - "happy"
+    - "sadness"
+    - "neutral"
+    - "excited"
+    - "frustration"
+    - "disgust"
+    - "fear"
+    - "surprise"
+  # Optional: DAIC-WOZ and MELD evaluation
+  evaluate_daic_woz: false
+  evaluate_meld: false
+  daic_woz_model_path: "models/audio/daic_woz_best.pt"
+  meld_model_path: "models/text/distilbert_meld_best.pt"

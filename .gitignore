@@ -1,0 +1,7 @@
+/data/
+/models/
+logs
+notebooks_tmp
+__pycache__
+.env
+.DS_Store
