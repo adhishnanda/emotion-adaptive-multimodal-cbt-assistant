@@ -191,7 +191,11 @@ def evaluate_unimodal(
                     logits = output
             elif modality == "video":
                 video_frames = batch["video_frames"].to(device)
-                logits = model(video_frames)
+                output = model(video_frames)
+                if isinstance(output, tuple):
+                    _, logits = output
+                else:
+                    logits = output
             else:
                 raise ValueError(f"Unknown modality: {modality}")
 

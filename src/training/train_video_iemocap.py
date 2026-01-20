@@ -69,8 +69,8 @@ def create_video_dataloaders(cfg) -> Tuple[DataLoader, DataLoader, DataLoader]:
         raw_cfg = yaml.safe_load(f)
 
     video_cfg = raw_cfg.get("iemocap_video", {})
-    image_size = video_cfg.get("image_size", 224)
-    batch_size = video_cfg.get("batch_size", 8)
+    image_size = int(video_cfg.get("image_size", 224))
+    batch_size = int(video_cfg.get("batch_size", 8))
 
     # Load datasets
     train_dataset = load_iemocap_multimodal_dataset(
@@ -163,9 +163,17 @@ def create_video_dataloaders(cfg) -> Tuple[DataLoader, DataLoader, DataLoader]:
             pin_memory=torch.cuda.is_available() if torch.cuda.is_available() else False,
         )
 
-    # Store label mapping in dataset for later use
+    # Store label mapping in all datasets for later use
     train_dataset.emotion_to_id = emotion_to_id
     train_dataset.id_to_emotion = {v: k for k, v in emotion_to_id.items()}
+
+    if val_dataset and len(val_dataset) > 0:
+        val_dataset.emotion_to_id = emotion_to_id
+        val_dataset.id_to_emotion = {v: k for k, v in emotion_to_id.items()}
+
+    if test_dataset and len(test_dataset) > 0:
+        test_dataset.emotion_to_id = emotion_to_id
+        test_dataset.id_to_emotion = {v: k for k, v in emotion_to_id.items()}
 
     return train_loader, val_loader, test_loader
 
@@ -209,8 +217,12 @@ def train_one_epoch(
         emotion_to_id = train_loader.dataset.emotion_to_id
         labels = torch.tensor([emotion_to_id[emotion] for emotion in emotions], dtype=torch.long).to(device)
 
-        # Stack video frames: (batch, C, H, W)
-        frames = torch.stack(video_frames).to(device)
+        # Move to device. If already stacked by DataLoader, just move to device.
+        if isinstance(video_frames, torch.Tensor):
+            frames = video_frames.to(device)
+        else:
+            # Fallback if not automatically stacked
+            frames = torch.stack(video_frames).to(device)
 
         # Forward pass
         loss, logits = model(frames, labels)
@@ -276,8 +288,12 @@ def evaluate_epoch(
             # Convert emotions to label IDs
             labels = torch.tensor([emotion_to_id[emotion] for emotion in emotions], dtype=torch.long).to(device)
 
-            # Stack video frames: (batch, C, H, W)
-            frames = torch.stack(video_frames).to(device)
+            # Move to device. If already stacked by DataLoader, just move to device.
+            if isinstance(video_frames, torch.Tensor):
+                frames = video_frames.to(device)
+            else:
+                # Fallback if not automatically stacked
+                frames = torch.stack(video_frames).to(device)
 
             # Forward pass
             loss, logits = model(frames, labels)
@@ -334,11 +350,11 @@ def train_video_iemocap():
 
     # Get IEMOCAP video config
     video_cfg = raw_cfg.get("iemocap_video", {})
-    batch_size = video_cfg.get("batch_size", 8)
-    learning_rate = video_cfg.get("learning_rate", 1e-4)
-    num_epochs = video_cfg.get("num_epochs", 20)
+    batch_size = int(video_cfg.get("batch_size", 8))
+    learning_rate = float(video_cfg.get("learning_rate", 1e-4))
+    num_epochs = int(video_cfg.get("num_epochs", 20))
     backbone = video_cfg.get("backbone", "resnet18")
-    freeze_backbone = video_cfg.get("freeze_backbone", False)
+    freeze_backbone = bool(video_cfg.get("freeze_backbone", False))
 
     logger.info(f"Backbone: {backbone}")
     logger.info(f"Freeze backbone: {freeze_backbone}")
@@ -368,7 +384,7 @@ def train_video_iemocap():
             device=cfg.device.device,
         )
         logger.info(f"Model built and moved to {cfg.device.device}")
-        
+
         # Count trainable parameters
         trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
         total_params = sum(p.numel() for p in model.parameters())
