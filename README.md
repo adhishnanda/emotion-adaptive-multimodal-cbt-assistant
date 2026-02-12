@@ -1,8 +1,16 @@
 # Emotion-Adaptive Multimodal CBT Assistant
+Applied ML system for multimodal emotion recognition (text/audio/vision) with late-fusion modeling and safety-framed CBT-style response generation. Built as an end-to-end, reproducible pipeline with clear separation of pretrained encoders vs task-trained fusion components.
 
 A research-oriented multimodal emotion recognition system that generates adaptive Cognitive Behavioral Therapy (CBT)-style responses based on emotional signals extracted from text, speech, and visual input.
 
-This project was developed as part of an MSc-level applied AI research study focusing on multimodal affective computing, modular system design, and ethical AI for digital mental health support.
+This project was developed as part of an applied AI research study focusing on multimodal affective computing, modular system design, and ethical AI for digital mental health support.
+
+## Highlights
+- **End-to-end ML pipeline**: preprocessing → unimodal encoders → fusion → calibrated emotion output → response generation  
+- **Multimodal modeling**: DistilBERT (text), ResNet features (vision), audio branch + optional depression-risk signal  
+- **Late fusion (MLP)** trained on **IEMOCAP**; text model fine-tuned on **MELD**  
+- **Evaluation**: accuracy, macro-F1, confusion matrices, qualitative examples  
+- **Reproducibility**: modular codebase, configurable paths, fixed splits/seeds where possible
 
 ---
 
@@ -201,12 +209,13 @@ This system is:
 ---
 
 ## Technical Stack
-- Python 3.x
-- PyTorch
-- HuggingFace Transformers
-- OpenCV
-- NumPy / SciPy
-- Scikit-learn
+- Python
+- PyTorch (torch, torchvision, torchaudio)
+- Transformers (DistilBERT)
+- scikit-learn (metrics/evaluation)
+- OpenCV + Pillow (image handling)
+- NumPy, Pandas
+- Matplotlib (plots)
 
 ---
 
@@ -236,6 +245,7 @@ This system is:
 - Real-time deployment pipeline
 - Expanded clinical evaluation
 - More robust emotion calibration
+
 
 
 
