@@ -1,3 +1,8 @@
+![Python](https://img.shields.io/badge/Python-3.x-blue)
+![PyTorch](https://img.shields.io/badge/PyTorch-DeepLearning-red)
+![Transformers](https://img.shields.io/badge/HuggingFace-Transformers-yellow)
+![License](https://img.shields.io/badge/License-Academic-green)
+
 # Emotion-Adaptive Multimodal CBT Assistant
 Applied ML system for multimodal emotion recognition (text/audio/vision) with late-fusion modeling and safety-framed CBT-style response generation. Built as an end-to-end, reproducible pipeline with clear separation of pretrained encoders vs task-trained fusion components.
 
@@ -250,6 +255,7 @@ This system is:
 
 ## Paper (PDF)
 - [One-page Summary](docs/One_Page_Summary.pdf)
+
 
 
 
