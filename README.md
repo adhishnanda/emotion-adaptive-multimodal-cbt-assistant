@@ -246,8 +246,10 @@ This system is:
 - Expanded clinical evaluation
 - More robust emotion calibration
 
+---
 
-
+## Paper (PDF)
+- [One-page Summary](docs/One_Page_Summary.pdf)
 
 
 
