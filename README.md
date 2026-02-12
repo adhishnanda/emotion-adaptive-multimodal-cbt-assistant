@@ -63,7 +63,7 @@ The system follows a late-fusion multimodal pipeline:
 5. Optional depression risk estimation
 6. CBT-style response generation
 
-See `docs/architecture.svg` for full diagram.
+![System Architecture](docs/architecture.svg)
 
 ---
 
@@ -236,6 +236,7 @@ This system is:
 - Real-time deployment pipeline
 - Expanded clinical evaluation
 - More robust emotion calibration
+
 
 
 
